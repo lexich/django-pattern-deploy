@@ -3,7 +3,7 @@ import os
 import shutil
 import stat
 
-TEMPLATE_PROJECT_PATH="git://github.com/lexich/django-pattern.git"
+TEMPLATE_PROJECT_PATH="https://github.com/lexich/django-pattern.git"
 
 class FileNotFoundException(Exception):
     """docstring for FileNotFoundException"""
