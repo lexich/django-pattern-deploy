@@ -77,11 +77,8 @@ class Manage(object):
         self._m('migrate')  
 
     def createsuperuser(self):
-        self._m('createsuperuser',
-            '--username=admin',
-            '--email=admin@admin.com',
-            '--noinput'
-        )
+        """ index management command"""
+        self._m('autocreatesuperuser')
 
     def collectstatic(self):
         self._m("collectstatic","--noinput")
