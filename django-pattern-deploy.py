@@ -104,4 +104,5 @@ def main(projectname):
         print e
 
 if __name__ == '__main__':
-    main('test1')
+    if len(os.sys.argv) > 2:
+        main(os.sys.argv[1])
