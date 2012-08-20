@@ -3,7 +3,7 @@ import os
 import shutil
 import stat
 
-TEMPLATE_PROJECT_PATH=os.path.join("D:/",'code','python','django-pattern')
+TEMPLATE_PROJECT_PATH="git://github.com/lexich/django-pattern.git"
 
 class FileNotFoundException(Exception):
     """docstring for FileNotFoundException"""
