@@ -70,13 +70,6 @@ def which(program):
     else:
         return which("%s.exe" % program)
 
-def find_tool(name, path):          
-    path.append(name)
-    tool = os.path.join(*path)
-    if os.path.isfile(tool):
-        return tool
-    return which(name)
-
 
 def startproject(projectname, template_project_path, debug):
     """
