@@ -15,6 +15,6 @@ Usage: django-pattern-deploy.py [options]
 Options:
 
     -h, --help                          - show this help message and exit
-    -n PROJECTNAME, --name=PROJECTNAME  - name for django project
-    -t TEMPLATE, --template=TEMPLATE    - template for django project
+    -n PROJECTNAME, --name=PROJECTNAME  - name of django project
+    -t TEMPLATE, --template=TEMPLATE    - template for django project (django-admin.py startproject --template=TEMPLATE
     -d, --debug                         - debug mode
