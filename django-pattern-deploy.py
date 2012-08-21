@@ -72,6 +72,7 @@ def which(program):
 
 def virtualenv(projectname, debug=False):
     virtualenv = which("virtualenv")
+    env = os.path.join(projectname,'.env')
     packages = '--no-site-packages' \
         if not debug else '--system-site-packages'
     system([
@@ -90,8 +91,7 @@ def startproject(projectname, template_project_path, debug):
     raise FileNotFoundException
     return python path executor
     """
-    django_admin = find_path('django-admin.py')    
-    env = os.path.join(projectname,'.env')
+    django_admin = find_path('django-admin.py')        
     python = which('python')    
     system([
         python, 
@@ -180,6 +180,5 @@ if __name__ == '__main__':
           action="store_true", dest="debug", default=False,
           help="debug mode")
     (opt, args) = parser.parse_args()
-    print opt
     if opt.projectname:
         main(opt.projectname, opt.template, opt.debug)
