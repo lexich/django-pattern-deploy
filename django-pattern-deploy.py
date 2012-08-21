@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import stat
+from optparse import OptionParser
 
 TEMPLATE_PROJECT_PATH="https://github.com/lexich/django-pattern/zipball/master"
 
@@ -16,6 +17,7 @@ class ToolNotFoundExeption(Exception):
         
 
 def rm_rf(top):
+    print "Clear project"
     if not os.path.exists(top):
         return
     """Recursive remove folder from top"""
@@ -76,7 +78,7 @@ def find_tool(name, path):
     return which(name)
 
 
-def startproject(projectname, template_project_path):
+def startproject(projectname, template_project_path, debug):
     """
     wrapper to django-admin startproject $projectname
     raise FileNotFoundException
@@ -94,9 +96,11 @@ def startproject(projectname, template_project_path):
     ])
     try:
         virtualenv = which("virtualenv")
+        packages = '--no-site-packages' \
+            if not debug else '--system-site-packages'
         system([
            virtualenv,
-           '--no-site-packages',
+           packages,
            os.path.join(projectname,'.env')
         ])
     except ToolNotFoundExeption, e:
@@ -147,14 +151,14 @@ class Manage(object):
         self._m("collectstatic","--noinput")
         
 
-def main(projectname, template_project_path):
-    if not which("python"): return
-    print "Clear project"
+def main(projectname, template, debug):
+    if not which("python"): return    
     rm_rf(projectname)
     try:
         startproject(
             projectname, 
-            template_project_path
+            template,
+            debug
         )        
         manage = Manage(projectname)        
         manage.syncdb()
@@ -170,9 +174,16 @@ def main(projectname, template_project_path):
         print e
 
 if __name__ == '__main__':
-    if len(os.sys.argv) > 1:
-        projectname = os.sys.argv[1]
-        template = TEMPLATE_PROJECT_PATH
-        if len(os.sys.argv) > 2:
-            template = os.sys.argv[2]
-        main(projectname, template)
+    parser = OptionParser()
+    parser.add_option("-n", "--name", dest="projectname",
+        help="name for django project")
+    parser.add_option("-t", "--template", dest="template", 
+        default=TEMPLATE_PROJECT_PATH,
+        help="template for django project")
+    parser.add_option("-d", "--debug",
+          action="store_true", dest="debug", default=False,
+          help="debug mode")
+    (opt, args) = parser.parse_args()
+    print opt
+    if opt.projectname:
+        main(opt.projectname, opt.template, opt.debug)
