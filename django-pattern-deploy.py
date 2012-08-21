@@ -176,10 +176,10 @@ def main(projectname, template, debug):
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-n", "--name", dest="projectname",
-        help="name for django project")
+        help="name of django project")
     parser.add_option("-t", "--template", dest="template", 
         default=TEMPLATE_PROJECT_PATH,
-        help="template for django project")
+        help="template for django project (django-admin.py startproject --template=TEMPLATE")
     parser.add_option("-d", "--debug",
           action="store_true", dest="debug", default=False,
           help="debug mode")
