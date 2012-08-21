@@ -1,5 +1,6 @@
 import subprocess
 import os
+import sys
 import shutil
 import stat
 
@@ -67,12 +68,11 @@ def which(program):
     else:
         return which("%s.exe" % program)
 
-def find_tool(name, paths):
-    for path in paths:        
-        path.append(name)
-        tool = os.path.join(*path)
-        if os.path.isfile(tool):
-            return tool
+def find_tool(name, path):          
+    path.append(name)
+    tool = os.path.join(*path)
+    if os.path.isfile(tool):
+        return tool
     return which(name)
 
 
@@ -84,8 +84,7 @@ def startproject(projectname):
     """
     django_admin = find_path('django-admin.py')    
     env = os.path.join(projectname,'.env')
-    python = which('python')
-
+    python = which('python')    
     system([
         python, 
         django_admin, 
@@ -102,10 +101,12 @@ def startproject(projectname):
         ])
     except ToolNotFoundExeption, e:
         print e
-    
-    tool_path = [[env,"bin"],[env,"Scripts"]]
-    pip = find_tool("pip", tool_path)
-    python = find_tool("python", tool_path)
+
+    env_bin = os.path.join(env,"Scripts") if sys.platform == 'win32' else os.path.join(env,"bin")
+    activate_this = os.path.join(env_bin,"activate_this.py")
+    execfile(activate_this, dict(__file__=activate_this))    
+    pip = 'pip'
+    python = 'python'
     system([
        pip,'install','-r',
        os.path.join(projectname,'requirements.txt')
@@ -158,7 +159,7 @@ def main(projectname):
         manage.migrate()
         manage.createsuperuser()
         manage.collectstatic()
-        manage.runserver()
+        manage.runserver()        
     except FileNotFoundException, e:
         print e
     except Exception, e:    
