@@ -28,7 +28,7 @@ def rm_rf(top):
 
 def find_path(filename):
     """find filepath of filename in System PATH"""
-    for path in os.environ['path'].split(';'):
+    for path in os.environ['PATH'].split(os.pathsep):
         file_path = os.path.join(path,filename)
         if os.path.exists(file_path):
             return file_path
