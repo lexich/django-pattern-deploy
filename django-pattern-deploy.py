@@ -96,14 +96,14 @@ def startproject(projectname, template_project_path, debug):
            packages,
            os.path.join(projectname,'.env')
         ])
+        env_bin = os.path.join(env,"Scripts") if sys.platform == 'win32' else os.path.join(env,"bin")
+        activate_this = os.path.join(env_bin,"activate_this.py")
+        execfile(activate_this, dict(__file__=activate_this))
+        python = which('python')
     except ToolNotFoundExeption, e:
         print e
-
-    env_bin = os.path.join(env,"Scripts") if sys.platform == 'win32' else os.path.join(env,"bin")
-    activate_this = os.path.join(env_bin,"activate_this.py")
-    execfile(activate_this, dict(__file__=activate_this))    
-    pip = which('pip')
-    python = which('python')
+    
+    pip = which('pip')    
     system([
        pip,'install','-r',
        os.path.join(projectname,'requirements.txt')
