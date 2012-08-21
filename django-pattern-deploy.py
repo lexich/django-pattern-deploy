@@ -124,7 +124,9 @@ class Manage(object):
             raise FileNotFoundException("File %s not found" % self.manage )
 
     def _m(self, *args):
-        system( [self.python, self.manage ] + args )
+        params = [self.python, self.manage] \
+            + [ x for x in args ]        
+        system( params )
 
     def runserver(self, port='8000'):
         """wrapper manage.py runserver"""
