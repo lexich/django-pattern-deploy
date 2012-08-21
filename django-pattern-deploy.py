@@ -70,6 +70,19 @@ def which(program):
     else:
         return which("%s.exe" % program)
 
+def virtualenv(projectname, debug=False):
+    virtualenv = which("virtualenv")
+    packages = '--no-site-packages' \
+        if not debug else '--system-site-packages'
+    system([
+       virtualenv,
+       packages,
+       os.path.join(projectname,'.env')
+    ])
+    env_bin = os.path.join(env,"Scripts") \
+        if sys.platform == 'win32' else os.path.join(env,"bin")
+    activate_this = os.path.join(env_bin,"activate_this.py")
+    execfile(activate_this, dict(__file__=activate_this))
 
 def startproject(projectname, template_project_path, debug):
     """
@@ -88,17 +101,7 @@ def startproject(projectname, template_project_path, debug):
         '--template={0}'.format(template_project_path)
     ])
     try:
-        virtualenv = which("virtualenv")
-        packages = '--no-site-packages' \
-            if not debug else '--system-site-packages'
-        system([
-           virtualenv,
-           packages,
-           os.path.join(projectname,'.env')
-        ])
-        env_bin = os.path.join(env,"Scripts") if sys.platform == 'win32' else os.path.join(env,"bin")
-        activate_this = os.path.join(env_bin,"activate_this.py")
-        execfile(activate_this, dict(__file__=activate_this))
+        virtualenv(projectname, debug)        
         python = which('python')
     except ToolNotFoundExeption, e:
         print e
