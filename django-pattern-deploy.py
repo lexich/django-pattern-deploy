@@ -9,6 +9,10 @@ class FileNotFoundException(Exception):
     """docstring for FileNotFoundException"""
     pass
 
+class ToolNotFoundExeption(Exception):
+    """docstring for ToolNotFoundExeption"""
+    pass
+        
 
 def rm_rf(top):
     if not os.path.exists(top):
@@ -25,6 +29,12 @@ def rm_rf(top):
     return shutil.rmtree(top, onerror=remove_readonly)
 
 
+def system(params):
+    """wrapper to subprocess.call func"""
+    print( "\nRun:\t{0}".format(" ".join(params)) )
+    result = "OK" if subprocess.call(params) == 0 else "FAIL"
+    print( "Resuls:\t{0}\n".format(result) )
+
 
 def find_path(filename):
     """find filepath of filename in System PATH"""
@@ -35,47 +45,72 @@ def find_path(filename):
     raise FileNotFoundException('File %s not found' % filename )
 
 
-def find_tool(name, paths):
-    for path in paths:
-	print path
-	path.append(name)
-	tool = os.path.join(*path)
-    	if os.path.exists(tool):
-            print("find_tool %s" % tool)
-            return tool
-    return name
+def which(program):
+    """
+    check executable program
+    http://stackoverflow.com/a/377028/1513126
+    """
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-	
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+    if program.endswith(".exe"):
+        raise ToolNotFoundExeption("Tool not found: '%s'" % program)
+    else:
+        return which("%s.exe" % program)
+
+def find_tool(name, paths):
+    for path in paths:        
+        path.append(name)
+        tool = os.path.join(*path)
+        if os.path.isfile(tool):
+            return tool
+    return which(name)
+
+
 def startproject(projectname):
     """
     wrapper to django-admin startproject $projectname
     raise FileNotFoundException
+    return python path executor
     """
-    django_admin = find_path('django-admin.py')
-    python = 'python'
-    subprocess.call([
+    django_admin = find_path('django-admin.py')    
+    env = os.path.join(projectname,'.env')
+    python = which('python')
+
+    system([
         python, 
         django_admin, 
         'startproject', 
         projectname, 
         '--template={0}'.format(TEMPLATE_PROJECT_PATH)
-        ])  
-    print "Create projectname"
-    env = os.path.join(projectname,'.env')
-    subprocess.call([
-	"virtualenv",
-	os.path.join(projectname,'.env')
     ])
-    tool_path = [[env,"bin"],[env,"Script"]]
+    try:
+        virtualenv = which("virtualenv")
+        system([
+           virtualenv,
+           '--no-site-packages',
+           os.path.join(projectname,'.env')
+        ])
+    except ToolNotFoundExeption, e:
+        print e
+    
+    tool_path = [[env,"bin"],[env,"Scripts"]]
     pip = find_tool("pip", tool_path)
     python = find_tool("python", tool_path)
-    subprocess.call([
-	pip,'install','-r',
-	os.path.join(projectname,'requirements.txt')
+    system([
+       pip,'install','-r',
+       os.path.join(projectname,'requirements.txt')
     ])
     return python
-
-
 
 class Manage(object):
     """docstring for Manage 
@@ -91,7 +126,7 @@ class Manage(object):
         params = [self.python, self.manage ] 
         for arg in args:
             params.append(arg)
-        subprocess.call( params )
+        system( params )
 
     def runserver(self, port='8000'):
         """wrapper manage.py runserver"""
@@ -112,6 +147,7 @@ class Manage(object):
         
 
 def main(projectname):
+    if not which("python"): return
     print "Clear project"
     rm_rf(projectname)
     try:
@@ -125,7 +161,9 @@ def main(projectname):
         manage.runserver()
     except FileNotFoundException, e:
         print e
-    except Exception, e:
+    except Exception, e:    
+        print e
+    except ToolNotFoundExeption, e:
         print e
 
 if __name__ == '__main__':
