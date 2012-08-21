@@ -48,6 +48,10 @@ def startproject(projectname):
         '--template={0}'.format(TEMPLATE_PROJECT_PATH)
         ])  
     print "Create projectname"
+    subprocess.call([
+	'pip','install','-r',
+	os.path.join(projectname,'requirements.txt')
+    ])
 
 
 
