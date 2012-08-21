@@ -76,7 +76,7 @@ def find_tool(name, path):
     return which(name)
 
 
-def startproject(projectname):
+def startproject(projectname, template_project_path):
     """
     wrapper to django-admin startproject $projectname
     raise FileNotFoundException
@@ -90,7 +90,7 @@ def startproject(projectname):
         django_admin, 
         'startproject', 
         projectname, 
-        '--template={0}'.format(TEMPLATE_PROJECT_PATH)
+        '--template={0}'.format(template_project_path)
     ])
     try:
         virtualenv = which("virtualenv")
@@ -105,20 +105,20 @@ def startproject(projectname):
     env_bin = os.path.join(env,"Scripts") if sys.platform == 'win32' else os.path.join(env,"bin")
     activate_this = os.path.join(env_bin,"activate_this.py")
     execfile(activate_this, dict(__file__=activate_this))    
-    pip = 'pip'
-    python = 'python'
+    pip = which('pip')
+    python = which('python')
     system([
        pip,'install','-r',
        os.path.join(projectname,'requirements.txt')
     ])
-    return python
+
 
 class Manage(object):
     """docstring for Manage 
         wrapper to manage.py
     """
-    def __init__(self, projectname,python='python'):
-        self.python = python
+    def __init__(self, projectname):
+        self.python = which('python')
         self.manage = os.path.join('.',projectname,'manage.py')
         if not os.path.exists(self.manage):
             raise FileNotFoundException("File %s not found" % self.manage )
@@ -147,14 +147,16 @@ class Manage(object):
         self._m("collectstatic","--noinput")
         
 
-def main(projectname):
+def main(projectname, template_project_path):
     if not which("python"): return
     print "Clear project"
     rm_rf(projectname)
     try:
-        python = startproject(projectname)
-        print( "Python path %s" % python)
-        manage = Manage(projectname, python)        
+        startproject(
+            projectname, 
+            template_project_path
+        )        
+        manage = Manage(projectname)        
         manage.syncdb()
         manage.migrate()
         manage.createsuperuser()
@@ -169,4 +171,8 @@ def main(projectname):
 
 if __name__ == '__main__':
     if len(os.sys.argv) > 1:
-        main(os.sys.argv[1])
+        projectname = os.sys.argv[1]
+        template = TEMPLATE_PROJECT_PATH
+        if len(os.sys.argv) > 2:
+            template = os.sys.argv[2]
+        main(projectname, template)
