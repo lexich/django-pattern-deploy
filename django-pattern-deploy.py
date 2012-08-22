@@ -17,10 +17,10 @@ class ToolNotFoundExeption(Exception):
         
 
 def rm_rf(top):
-    print "Clear project"
+    """Recursive remove folder from top"""
     if not os.path.exists(top):
         return
-    """Recursive remove folder from top"""
+    print "Clear project"
     def remove_readonly(fn, path, excinfo):
         """Help function to rmtree function of shutil module"""
         if fn is os.rmdir:
