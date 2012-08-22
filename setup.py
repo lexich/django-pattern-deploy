@@ -5,6 +5,10 @@ setup(
 	version="0.0.3",
 	url="https://github.com/lexich/django-pattern-deploy",
 	author="lexich",
+	install_requires=[
+		"virtualenv",
+		"django",
+	],
 	scripts=["django-pattern-deploy.py",],
 	packages=find_packages()
 	)
