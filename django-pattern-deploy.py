@@ -162,10 +162,10 @@ def main(projectname, template, debug):
         manage.collectstatic()
         manage.runserver()        
     except FileNotFoundException, e:
+        print e    
+    except ToolNotFoundExeption, e:
         print e
     except Exception, e:    
-        print e
-    except ToolNotFoundExeption, e:
         print e
 
 if __name__ == '__main__':
