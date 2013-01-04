@@ -8,6 +8,11 @@ create django project from [https://github.com/lexich/django-pattern](https://gi
 ###usage
 > pip install -e git+git://github.com/lexich/django-pattern-deploy.git#egg=patterndeploy && django-pattern-deploy.py -n projectname
 
+###requirements
+python 2.7 - check version
+nodejs 0.8
+other dependecies install automatically
+
 ###help
 
 Usage: django-pattern-deploy.py [options]
