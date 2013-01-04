@@ -17,10 +17,10 @@ class ToolNotFoundExeption(Exception):
         
 
 def rm_rf(top):
-    print "Clear project"
+    """Recursive remove folder from top"""
     if not os.path.exists(top):
         return
-    """Recursive remove folder from top"""
+    print "Clear project"
     def remove_readonly(fn, path, excinfo):
         """Help function to rmtree function of shutil module"""
         if fn is os.rmdir:
@@ -203,10 +203,10 @@ def main(projectname, template, debug):
         manage.collectstatic()
         manage.runserver()        
     except FileNotFoundException, e:
+        print e    
+    except ToolNotFoundExeption, e:
         print e
     except Exception, e:    
-        print e
-    except ToolNotFoundExeption, e:
         print e
 
 if __name__ == '__main__':
