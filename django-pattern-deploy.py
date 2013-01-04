@@ -38,6 +38,8 @@ def system(params):
     result = "OK" if subprocess.call(params) == 0 else "FAIL"
     print( "Resuls:\t{0}\n".format(result) )
 
+def is_win():
+    return sys.platform == "win32"
 
 def find_path(filename):
     """find filepath of filename in System PATH"""
@@ -145,6 +147,41 @@ class Manage(object):
     def collectstatic(self):
         self._m("collectstatic","--noinput")
         
+class Node(object):
+    def __init__(self,projectname):
+        self.projectname = projectname
+
+    def push_projectdir(self):
+        system("cd %s" % self.projectname)
+
+    def pop_projectdir(self):
+        system("cd ..")
+
+    def npm_install(self):
+        self.push_projectdir()
+        npm = which("npm")
+        system([npm,'install'])
+        self.pop_projectdir()
+
+    def ext(self):
+        ".cmd" if is_win() else ""
+
+    def bower_install(self):        
+        self.push_projectdir()        
+        bower = os.join("node_modules",".bin","bower%s" % self.ext() )
+        system([
+            bower, 'install'
+        ])
+        self.pop_projectdir()
+
+    def grunt(self):
+        self.push_projectdir()
+        grunt = os.join("node_modules",".bin","grunt%s" % self.ext() )
+        system([
+            grunt,
+        ])
+        self.pop_projectdir()
+
 
 def main(projectname, template, debug):
     if not which("python"): return    
@@ -159,6 +196,10 @@ def main(projectname, template, debug):
         manage.syncdb()
         manage.migrate()
         manage.createsuperuser()
+        node = Node(projectname)
+        node.npm_install()
+        node.bower_install()
+        node.grunt()
         manage.collectstatic()
         manage.runserver()        
     except FileNotFoundException, e:
