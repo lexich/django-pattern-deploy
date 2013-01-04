@@ -32,11 +32,13 @@ def rm_rf(top):
     return shutil.rmtree(top, onerror=remove_readonly)
 
 
-def system(params):
+def system(params, cwd=None):
     """wrapper to subprocess.call func"""
     print( "\nRun:\t{0}".format(" ".join(params)) )
-    result = "OK" if subprocess.call(params) == 0 else "FAIL"
-    print( "Resuls:\t{0}\n".format(result) )
+    p = subprocess.Popen(params,cwd=cwd, shell=True)
+    p.wait()
+    print("OK")
+    
 
 def is_win():
     return sys.platform == "win32"
@@ -151,36 +153,27 @@ class Node(object):
     def __init__(self,projectname):
         self.projectname = projectname
 
-    def push_projectdir(self):
-        system("cd %s" % self.projectname)
-
-    def pop_projectdir(self):
-        system("cd ..")
-
-    def npm_install(self):
-        self.push_projectdir()
+    def npm_install(self):        
         npm = which("npm")
-        system([npm,'install'])
-        self.pop_projectdir()
+        system(
+            [npm,'install'],
+            cwd=self.projectname)
+        
 
     def ext(self):
-        ".cmd" if is_win() else ""
+        return ".cmd" if is_win() else ""
 
-    def bower_install(self):        
-        self.push_projectdir()        
-        bower = os.join("node_modules",".bin","bower%s" % self.ext() )
-        system([
-            bower, 'install'
-        ])
-        self.pop_projectdir()
+    def bower_install(self):                
+        bower = os.path.join("node_modules",".bin","bower%s" % self.ext() )
+        system(
+            [bower, 'install'],
+            cwd=self.projectname)
 
     def grunt(self):
-        self.push_projectdir()
-        grunt = os.join("node_modules",".bin","grunt%s" % self.ext() )
-        system([
-            grunt,
-        ])
-        self.pop_projectdir()
+        grunt = os.path.join("node_modules",".bin","grunt%s" % self.ext() )
+        system(
+            [grunt],
+            cwd=self.projectname)
 
 
 def main(projectname, template, debug):
