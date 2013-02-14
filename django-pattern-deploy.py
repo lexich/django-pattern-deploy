@@ -78,11 +78,11 @@ def which(program):
     else:
         return which("%s.exe" % program)
 
-def virtualenv(projectname, debug=False):
+def virtualenv(cwd, debug=False):
     virtualenv = which("virtualenv")    
     packages = '--no-site-packages' \
         if not debug else '--system-site-packages'
-    env = '.env_%s' % projectname
+    env = os.path.join(cwd, ".env" )
     exec_system([
        virtualenv,
        packages,
@@ -100,8 +100,8 @@ def startproject(projectname, template_project_path, debug):
     return python path executor
     """    
     python = ""
-    pip = ""
-    try:
+    pip = ""    
+    try:        
         virtualenv(projectname, debug)        
         python = which('python')
         pip = which('pip')
@@ -113,33 +113,35 @@ def startproject(projectname, template_project_path, debug):
     ])
     django_admin = find_path('django-admin.py')
     exec_system([
-              python, 
-              django_admin,
-              'startproject', 
-              projectname, 
-             '--template={0}'.format(template_project_path)
-    ])
+      python, 
+      django_admin,
+      'startproject', 
+      projectname, 
+     '--template={0}'.format(template_project_path)
+    ], cwd=projectname)
     
     exec_system([
        pip,'install','-r',
-       os.path.join(projectname,'requirements.txt')
-    ])    
+       os.path.join(projectname, projectname, 'requirements.txt')
+    ])
+    return os.path.join(projectname,projectname)
 
 
 class Manage(object):
     """docstring for Manage 
         wrapper to manage.py
     """
-    def __init__(self, projectname):
+    def __init__(self, cwd):
+        self.cwd = cwd
         self.python = which('python')
-        self.manage = os.path.join('.',projectname,'manage.py')
-        if not os.path.exists(self.manage):
+        self.manage = 'manage.py'
+        if not os.path.exists(os.path.join(self.cwd,self.manage) ):
             raise FileNotFoundException("File %s not found" % self.manage )
 
     def _m(self, *args):
         params = [self.python, self.manage] \
             + [ x for x in args ]        
-        exec_system( params )
+        exec_system( params, cwd=self.cwd )
 
     def runserver(self, port='8000'):
         """wrapper manage.py runserver"""
@@ -159,46 +161,45 @@ class Manage(object):
         self._m("collectstatic","--noinput")
         
 class Node(object):
-    def __init__(self,projectname):
-        self.projectname = projectname
+    def __init__(self, cwd):
+        self.cwd = cwd
+
+    def _exec(self, params):
+        exec_system( params, cwd=self.cwd)
 
     def npm_install(self):        
         npm = which("npm")
-        exec_system(
-            [npm,'install'],
-            cwd=self.projectname)
-        
+        self._exec([npm,'install'])        
 
     def ext(self):
-        return ".cmd" if is_win() else ""
+        return ".cmd" if is_win() else ""    
 
     def bower_install(self):                
         bower = os.path.join("node_modules",".bin","bower%s" % self.ext() )
-        exec_system(
-            [bower, 'install'],
-            cwd=self.projectname)
+        self._exec([bower, 'install'])
 
     def grunt(self):
         grunt = os.path.join("node_modules",".bin","grunt%s" % self.ext() )
-        exec_system(
-            [grunt],
-            cwd=self.projectname)
+        self._exec([grunt])
 
 
 def main(projectname, template, debug):
     if not which("python"): return    
-    rm_rf(projectname)
+    rm_rf(
+        os.path.join(projectname,projectname)
+        #projectname        
+    )
     try:
-        startproject(
+        path = startproject(
             projectname, 
             template,
             debug
         )        
-        manage = Manage(projectname)        
+        manage = Manage(path)
         manage.syncdb()
         manage.migrate()
         manage.createsuperuser()
-        node = Node(projectname)
+        node = Node(path)
         node.npm_install()
         node.bower_install()
         node.grunt()
