@@ -186,8 +186,7 @@ class Node(object):
 def main(projectname, template, debug):
     if not which("python"): return    
     rm_rf(
-        os.path.join(projectname,projectname)
-        #projectname        
+        os.path.join(projectname,projectname)        
     )
     try:
         path = startproject(
