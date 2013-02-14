@@ -36,8 +36,9 @@ def rm_rf(top):
 def exec_system(params, cwd=None):
     """wrapper to subprocess.call func"""
     print( "\nRun:\t{0}".format(" ".join(params)) )
-    p = subprocess.Popen(params,cwd=cwd, shell=True)
-    p.wait()
+    #p = subprocess.Popen(params,cwd=cwd, shell=True)
+    #p.wait()
+    os.system( " ".join(params) )
     print("OK")
     
 
@@ -76,14 +77,14 @@ def which(program):
         return which("%s.exe" % program)
 
 def virtualenv(projectname, debug=False):
-    virtualenv = which("virtualenv")
-    env = os.path.join(projectname,'.env')
+    virtualenv = which("virtualenv")    
     packages = '--no-site-packages' \
         if not debug else '--system-site-packages'
+    env = '.env_%s' % projectname
     exec_system([
        virtualenv,
        packages,
-       os.path.join(projectname,'.env')
+       env
     ])
     env_bin = os.path.join(env,"Scripts") \
         if sys.platform == 'win32' else os.path.join(env,"bin")
@@ -95,27 +96,32 @@ def startproject(projectname, template_project_path, debug):
     wrapper to django-admin startproject $projectname
     raise FileNotFoundException
     return python path executor
-    """
-    django_admin = find_path('django-admin.py')        
-    python = which('python')    
-    exec_system([
-        python, 
-        django_admin, 
-        'startproject', 
-        projectname, 
-        '--template={0}'.format(template_project_path)
-    ])
+    """    
+    python = ""
+    pip = ""
     try:
         virtualenv(projectname, debug)        
         python = which('python')
+        pip = which('pip')
     except ToolNotFoundExeption, e:
         print e
     
-    pip = which('pip')    
-    system([
+    exec_system([
+        pip,'install','django'
+    ])
+    django_admin = find_path('django-admin.py')
+    exec_system([
+              python, 
+              django_admin,
+              'startproject', 
+              projectname, 
+             '--template={0}'.format(template_project_path)
+    ])
+    
+    exec_system([
        pip,'install','-r',
        os.path.join(projectname,'requirements.txt')
-    ])
+    ])    
 
 
 class Manage(object):
@@ -131,7 +137,7 @@ class Manage(object):
     def _m(self, *args):
         params = [self.python, self.manage] \
             + [ x for x in args ]        
-        system( params )
+        exec_system( params )
 
     def runserver(self, port='8000'):
         """wrapper manage.py runserver"""
@@ -156,7 +162,7 @@ class Node(object):
 
     def npm_install(self):        
         npm = which("npm")
-        system(
+        exec_system(
             [npm,'install'],
             cwd=self.projectname)
         
@@ -166,13 +172,13 @@ class Node(object):
 
     def bower_install(self):                
         bower = os.path.join("node_modules",".bin","bower%s" % self.ext() )
-        system(
+        exec_system(
             [bower, 'install'],
             cwd=self.projectname)
 
     def grunt(self):
         grunt = os.path.join("node_modules",".bin","grunt%s" % self.ext() )
-        system(
+        exec_system(
             [grunt],
             cwd=self.projectname)
 
