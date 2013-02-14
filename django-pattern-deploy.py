@@ -38,7 +38,9 @@ def exec_system(params, cwd=None):
     print( "\nRun:\t{0}".format(" ".join(params)) )
     #p = subprocess.Popen(params,cwd=cwd, shell=True)
     #p.wait()
-    os.system( " ".join(params) )
+    #os.system( " ".join(params) )
+    print params
+    subprocess.check_call(params, cwd=cwd)
     print("OK")
     
 
