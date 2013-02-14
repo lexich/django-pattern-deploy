@@ -33,7 +33,7 @@ def rm_rf(top):
     return shutil.rmtree(top, onerror=remove_readonly)
 
 
-def system(params, cwd=None):
+def exec_system(params, cwd=None):
     """wrapper to subprocess.call func"""
     print( "\nRun:\t{0}".format(" ".join(params)) )
     p = subprocess.Popen(params,cwd=cwd, shell=True)
@@ -80,7 +80,7 @@ def virtualenv(projectname, debug=False):
     env = os.path.join(projectname,'.env')
     packages = '--no-site-packages' \
         if not debug else '--system-site-packages'
-    system([
+    exec_system([
        virtualenv,
        packages,
        os.path.join(projectname,'.env')
@@ -98,7 +98,7 @@ def startproject(projectname, template_project_path, debug):
     """
     django_admin = find_path('django-admin.py')        
     python = which('python')    
-    system([
+    exec_system([
         python, 
         django_admin, 
         'startproject', 
